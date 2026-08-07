@@ -179,6 +179,8 @@ model Choice {
   question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   userAnswers UserAnswer[]
+
+  @@index([questionId])
 }
 
 model UserAnswer {
