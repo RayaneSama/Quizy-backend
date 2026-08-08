@@ -7,6 +7,11 @@ import { AuthModule } from './auth/auth.module';
 import { ModuleModule } from './module/module.module';
 import { CourseModule } from './course/course.module';
 import { QuestionModule } from './question/question.module';
+import { AttemptModule } from './attempt/attempt.module';
+import { BookmarkModule } from './bookmark/bookmark.module';
+import { CommentModule } from './comment/comment.module';
+import { ReportModule } from './report/report.module';
+import { NoteModule } from './note/note.module';
 
 @Module({
   imports: [
@@ -16,6 +21,11 @@ import { QuestionModule } from './question/question.module';
     ModuleModule,
     CourseModule,
     QuestionModule,
+    AttemptModule,
+    BookmarkModule,
+    CommentModule,
+    ReportModule,
+    NoteModule,
   ],
   controllers: [AppController],
   providers: [AppService],
