@@ -49,11 +49,11 @@ export class UserController {
     return this.userService.getStatistics(user.sub);
   }
 
-  // @Get('me/progress')
-  // @UseGuards(AuthGuard('jwt'))
-  // getProgress(@CurrentUser() user: JwtPayload) {
-  //   return this.userService.getProgress(user.sub);
-  // }
+  @Get('me/progress')
+  @UseGuards(AuthGuard('jwt'))
+  getProgress(@CurrentUser() user: JwtPayload) {
+    return this.userService.getProgress(user.sub);
+  }
   @Patch('me/password')
   @UseGuards(AuthGuard('jwt'))
   changePassword(

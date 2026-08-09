@@ -241,4 +241,123 @@ export class UserService {
       examAttempts,
     };
   }
+  async getProgress(userId: string) {
+    const attempts = await this.prisma.attempt.findMany({
+      where: {
+        userId,
+      },
+      include: {
+        course: {
+          select: {
+            id: true,
+            name: true,
+            questions: {
+              select: {
+                id: true,
+                choices: {
+                  select: {
+                    id: true,
+                    isCorrect: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        answers: true,
+      },
+    });
+
+    const courses = new Map<
+      string,
+      {
+        courseId: string;
+        courseName: string;
+        totalQuestions: number;
+        answeredQuestions: Set<string>;
+        correctQuestions: Set<string>;
+      }
+    >();
+
+    for (const attempt of attempts) {
+      let courseProgress = courses.get(attempt.courseId);
+
+      if (!courseProgress) {
+        courseProgress = {
+          courseId: attempt.courseId,
+          courseName: attempt.course.name,
+          totalQuestions: attempt.course.questions.length,
+          answeredQuestions: new Set<string>(),
+          correctQuestions: new Set<string>(),
+        };
+
+        courses.set(attempt.courseId, courseProgress);
+      }
+
+      const answersByQuestion = new Map<string, string[]>();
+
+      for (const answer of attempt.answers) {
+        const existing = answersByQuestion.get(answer.questionId);
+
+        if (existing) {
+          existing.push(answer.choiceId);
+        } else {
+          answersByQuestion.set(answer.questionId, [answer.choiceId]);
+        }
+      }
+
+      for (const [questionId, selectedChoices] of answersByQuestion) {
+        courseProgress.answeredQuestions.add(questionId);
+
+        const question = attempt.course.questions.find(
+          (question) => question.id === questionId,
+        );
+
+        if (!question) {
+          continue;
+        }
+
+        const correctIds = question.choices
+          .filter((choice) => choice.isCorrect)
+          .map((choice) => choice.id)
+          .sort();
+
+        const selectedIds = [...selectedChoices].sort();
+
+        const isCorrect =
+          JSON.stringify(correctIds) === JSON.stringify(selectedIds);
+
+        if (isCorrect) {
+          courseProgress.correctQuestions.add(questionId);
+        }
+      }
+    }
+
+    return Array.from(courses.values()).map((course) => {
+      const answeredQuestions = course.answeredQuestions.size;
+      const correctAnswers = course.correctQuestions.size;
+
+      const progress =
+        course.totalQuestions === 0
+          ? 0
+          : Number(
+              ((answeredQuestions / course.totalQuestions) * 100).toFixed(2),
+            );
+
+      const accuracy =
+        answeredQuestions === 0
+          ? 0
+          : Number(((correctAnswers / answeredQuestions) * 100).toFixed(2));
+
+      return {
+        courseId: course.courseId,
+        courseName: course.courseName,
+        totalQuestions: course.totalQuestions,
+        answeredQuestions,
+        correctAnswers,
+        progress,
+        accuracy,
+      };
+    });
+  }
 }
