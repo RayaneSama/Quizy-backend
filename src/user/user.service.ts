@@ -9,6 +9,7 @@ import { RegisterDto } from 'src/auth/dto/register.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import * as bcrypt from 'bcrypt';
+import { AttemptMode } from '@prisma/client';
 
 @Injectable()
 export class UserService {
@@ -160,6 +161,84 @@ export class UserService {
     return {
       success: true,
       message: 'Password changed successfully. Please log in again.',
+    };
+  }
+  async getStatistics(userId: string) {
+    const attempts = await this.prisma.attempt.findMany({
+      where: {
+        userId,
+      },
+      include: {
+        questions: {
+          include: {
+            question: {
+              include: {
+                choices: true,
+              },
+            },
+          },
+        },
+        answers: true,
+      },
+    });
+
+    const totalAttempts = attempts.length;
+
+    const completedAttempts = attempts.filter(
+      (attempt) => attempt.finishedAt !== null,
+    ).length;
+
+    let totalQuestions = 0;
+    let correctAnswers = 0;
+
+    for (const attempt of attempts) {
+      totalQuestions += attempt.questions.length;
+
+      for (const attemptQuestion of attempt.questions) {
+        const questionId = attemptQuestion.questionId;
+
+        const selectedChoices = attempt.answers
+          .filter((answer) => answer.questionId === questionId)
+          .map((answer) => answer.choiceId)
+          .sort();
+
+        const correctChoices = attemptQuestion.question.choices
+          .filter((choice) => choice.isCorrect)
+          .map((choice) => choice.id)
+          .sort();
+
+        if (
+          JSON.stringify(correctChoices) === JSON.stringify(selectedChoices)
+        ) {
+          correctAnswers++;
+        }
+      }
+    }
+
+    const incorrectAnswers = totalQuestions - correctAnswers;
+
+    const accuracy =
+      totalQuestions === 0
+        ? 0
+        : Number(((correctAnswers / totalQuestions) * 100).toFixed(2));
+
+    const practiceAttempts = attempts.filter(
+      (attempt) => attempt.mode === AttemptMode.PRACTICE,
+    ).length;
+
+    const examAttempts = attempts.filter(
+      (attempt) => attempt.mode === AttemptMode.EXAM,
+    ).length;
+
+    return {
+      totalAttempts,
+      completedAttempts,
+      totalQuestions,
+      correctAnswers,
+      incorrectAnswers,
+      accuracy,
+      practiceAttempts,
+      examAttempts,
     };
   }
 }
