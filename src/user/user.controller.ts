@@ -1,9 +1,22 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Patch,
+  UseGuards,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 // import { UserInfoDto } from './user-info.dto';
 import { RegisterDto } from 'src/auth/dto/register.dto';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import type { JwtPayload } from 'src/auth/types/jwt-payload.type';
+import { AuthGuard } from '@nestjs/passport';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
-@Controller('user')
+@Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -11,8 +24,22 @@ export class UserController {
   findAll() {
     return this.userService.findAll();
   }
+  @Get('me')
+  @UseGuards(AuthGuard('jwt'))
+  getProfile(@CurrentUser() user: JwtPayload) {
+    return this.userService.getProfile(user.sub);
+  }
+
+  @Patch('me')
+  @UseGuards(AuthGuard('jwt'))
+  updateProfile(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: UpdateProfileDto,
+  ) {
+    return this.userService.updateProfile(user.sub, dto);
+  }
   @Post()
-  findUnique(@Body() data: RegisterDto) {
+  createUser(@Body() data: RegisterDto) {
     return this.userService.createUser(data);
   }
   @Delete(':id')

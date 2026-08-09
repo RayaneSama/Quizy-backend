@@ -72,7 +72,7 @@ model User {
   password           String
   firstName          String
   lastName           String
-  userName           String
+  userName           String  @unique
   hashedRefreshToken String?
 
   status AccountStatus @default(PENDING)
