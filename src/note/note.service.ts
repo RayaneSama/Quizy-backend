@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -32,9 +33,7 @@ export class NoteService {
     });
 
     if (existingNote) {
-      throw new ForbiddenException(
-        'You already have a note for this question.',
-      );
+      throw new ConflictException('You already have a note for this question.');
     }
 
     return this.prisma.note.create({

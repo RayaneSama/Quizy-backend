@@ -5,7 +5,6 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
   UseGuards,
 } from '@nestjs/common';
 import { AttemptService } from './attempt.service';
@@ -59,8 +58,8 @@ export class AttemptController {
     return this.attemptService.results(id, user.sub);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.attemptService.remove(id);
-  }
+  // @Delete(':id')
+  // remove(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+  //   return this.attemptService.remove(id, user.sub);
+  // }
 }

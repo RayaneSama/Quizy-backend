@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -15,7 +19,17 @@ export class BookmarkService {
     if (!question) {
       throw new NotFoundException('Question not found.');
     }
-
+    const existingBookmark = await this.prisma.bookmark.findUnique({
+      where: {
+        userId_questionId: {
+          userId,
+          questionId,
+        },
+      },
+    });
+    if (existingBookmark) {
+      throw new ConflictException('This question is already bookmarked.');
+    }
     return this.prisma.bookmark.create({
       data: {
         userId,

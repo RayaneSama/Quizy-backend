@@ -1,11 +1,13 @@
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
 export class UpdateChoiceDto {
   @IsString()
-  @IsOptional()
-  text?: string;
+  // @IsOptional()
+  @IsNotEmpty()
+  @MaxLength(1000)
+  text!: string;
 
   @IsBoolean()
-  @IsOptional()
-  isCorrect?: boolean;
+  // @IsOptional()
+  isCorrect!: boolean;
 }

@@ -180,7 +180,9 @@ export class AttemptService {
     });
 
     if (choices.length !== dto.choiceIds.length) {
-      throw new NotFoundException('Invalid choice.');
+      throw new BadRequestException(
+        'One or more selected choices are invalid.',
+      );
     }
 
     const existingAnswer = await this.prisma.userAnswer.findFirst({
@@ -322,11 +324,25 @@ export class AttemptService {
       details,
     };
   }
-  async remove(id: string) {
-    return this.prisma.attempt.delete({
-      where: {
-        id,
-      },
-    });
-  }
+  // async remove(id: string, userId: string) {
+  //   const attempt = await this.prisma.attempt.findUnique({
+  //     where: {
+  //       id,
+  //     },
+  //   });
+
+  //   if (!attempt) {
+  //     throw new NotFoundException('Attempt not found.');
+  //   }
+
+  //   if (attempt.userId !== userId) {
+  //     throw new ForbiddenException('You can only delete your own attempts.');
+  //   }
+
+  //   return this.prisma.attempt.delete({
+  //     where: {
+  //       id,
+  //     },
+  //   });
+  // }
 }

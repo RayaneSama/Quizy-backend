@@ -1,8 +1,8 @@
-import { IsEnum, IsInt, IsString, Min } from 'class-validator';
+import { IsEnum, IsInt, IsUUID, Min } from 'class-validator';
 import { AttemptMode } from '@prisma/client';
 
 export class CreateAttemptDto {
-  @IsString()
+  @IsUUID()
   courseId!: string;
 
   @IsEnum(AttemptMode)

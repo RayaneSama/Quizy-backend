@@ -4,6 +4,8 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  IsUUID,
+  MaxLength,
   ValidateNested,
 } from 'class-validator';
 
@@ -13,17 +15,19 @@ import { CreateChoiceDto } from './create-choice.dto';
 export class CreateQuestionDto {
   @IsString()
   @IsNotEmpty()
+  @MaxLength(5000)
   statement!: string;
 
   @IsString()
   @IsOptional()
+  @MaxLength(5000)
   explanation?: string;
 
-  @IsString()
+  @IsUUID()
   @IsNotEmpty()
   moduleId!: string;
 
-  @IsString()
+  @IsUUID()
   @IsNotEmpty()
   courseId!: string;
 

@@ -109,6 +109,9 @@ export class ReportService {
     if (report.userId !== userId) {
       throw new ForbiddenException('You can only delete your own reports.');
     }
+    if (report.status !== ReportStatus.PENDING) {
+      throw new ForbiddenException('Processed reports cannot be deleted.');
+    }
 
     return this.prisma.report.delete({
       where: {

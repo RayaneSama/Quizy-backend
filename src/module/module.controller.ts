@@ -6,13 +6,18 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { ModuleService } from './module.service';
 import { CreateModuleDto } from './dto/create-module.dto';
 import { UpdateModuleDto } from './dto/update-module.dto';
 import { CourseService } from 'src/course/course.service';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 
 @Controller('module')
+@UseGuards(AuthGuard('jwt'))
 export class ModuleController {
   constructor(
     private readonly moduleService: ModuleService,
@@ -20,6 +25,8 @@ export class ModuleController {
   ) {}
 
   @Post()
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN')
   create(@Body() createModuleDto: CreateModuleDto) {
     return this.moduleService.create(createModuleDto);
   }
@@ -40,11 +47,15 @@ export class ModuleController {
   }
 
   @Patch(':id')
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN')
   update(@Param('id') id: string, @Body() updateModuleDto: UpdateModuleDto) {
     return this.moduleService.update(id, updateModuleDto);
   }
 
   @Delete(':id')
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN')
   remove(@Param('id') id: string) {
     return this.moduleService.remove(id);
   }

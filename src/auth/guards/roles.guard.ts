@@ -2,6 +2,7 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
 import { ROLES_KEY } from '../decorators/roles.decorator';
+import { Role } from '@prisma/client';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -21,7 +22,7 @@ export class RolesGuard implements CanActivate {
       user: {
         id: string;
         email: string;
-        role: string;
+        role: Role;
       };
     }>();
 

@@ -12,6 +12,8 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import type { JwtPayload } from 'src/auth/types/jwt-payload.type';
 import { AuthGuard } from '@nestjs/passport';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
 
 @Controller('comments')
 @UseGuards(AuthGuard('jwt'))
@@ -35,5 +37,11 @@ export class CommentController {
   @Delete(':id')
   remove(@CurrentUser() user: JwtPayload, @Param('id') commentId: string) {
     return this.commentService.remove(user.sub, commentId);
+  }
+  @Delete(':id/admin')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('ADMIN')
+  removeAsAdmin(@Param('id') commentId: string) {
+    return this.commentService.removeAsAdmin(commentId);
   }
 }

@@ -273,6 +273,7 @@ model UserAnswer {
 
   createdAt DateTime @default(now())
 
+  @@unique([attemptId, questionId, choiceId])
   @@index([userId])
   @@index([questionId])
   @@index([choiceId])

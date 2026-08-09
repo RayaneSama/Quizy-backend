@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateModuleDto } from './dto/create-module.dto';
 import { UpdateModuleDto } from './dto/update-module.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -19,14 +19,27 @@ export class ModuleService {
   }
 
   async findOne(id: string) {
-    return this.prisma.module.findUnique({
+    const module = await this.prisma.module.findUnique({
       where: {
         id,
       },
     });
+    if (!module) {
+      throw new NotFoundException('Module not found.');
+    }
+    return module;
   }
 
   async update(id: string, dto: UpdateModuleDto) {
+    const module = await this.prisma.module.update({
+      where: {
+        id,
+      },
+      data: dto,
+    });
+    if (!module) {
+      throw new NotFoundException('Module not found.');
+    }
     return this.prisma.module.update({
       where: {
         id,
@@ -36,6 +49,16 @@ export class ModuleService {
   }
 
   async remove(id: string) {
+    const module = await this.prisma.module.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!module) {
+      throw new NotFoundException('Module not found.');
+    }
+
     return this.prisma.module.delete({
       where: {
         id,

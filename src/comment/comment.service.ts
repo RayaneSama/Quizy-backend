@@ -81,4 +81,21 @@ export class CommentService {
       },
     });
   }
+  async removeAsAdmin(commentId: string) {
+    const comment = await this.prisma.comment.findUnique({
+      where: {
+        id: commentId,
+      },
+    });
+
+    if (!comment) {
+      throw new NotFoundException('Comment not found.');
+    }
+
+    return this.prisma.comment.delete({
+      where: {
+        id: commentId,
+      },
+    });
+  }
 }

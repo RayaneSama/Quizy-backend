@@ -29,8 +29,9 @@ export class ReportController {
     return this.reportService.findAll();
   }
 
-  @Roles('ADMIN')
   @Patch(':id/status')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('ADMIN')
   updateStatus(
     @Param('id') reportId: string,
     @Body() dto: UpdateReportStatusDto,

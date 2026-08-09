@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -8,6 +8,16 @@ export class CourseService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateCourseDto) {
+    const module = await this.prisma.module.findUnique({
+      where: {
+        id: dto.moduleId,
+      },
+    });
+
+    if (!module) {
+      throw new NotFoundException('Module not found.');
+    }
+
     return this.prisma.course.create({
       data: dto,
     });
@@ -22,7 +32,7 @@ export class CourseService {
   }
 
   async findOne(id: string) {
-    return this.prisma.course.findUnique({
+    const course = await this.prisma.course.findUnique({
       where: {
         id,
       },
@@ -30,9 +40,25 @@ export class CourseService {
         module: true,
       },
     });
+
+    if (!course) {
+      throw new NotFoundException('Course not found.');
+    }
+
+    return course;
   }
 
   async findByModule(moduleId: string) {
+    const module = await this.prisma.module.findUnique({
+      where: {
+        id: moduleId,
+      },
+    });
+
+    if (!module) {
+      throw new NotFoundException('Module not found.');
+    }
+
     return this.prisma.course.findMany({
       where: {
         moduleId,
@@ -40,11 +66,52 @@ export class CourseService {
     });
   }
 
-  update(id: string, updateCourseDto: UpdateCourseDto) {
-    return this.prisma.course.update({ where: { id }, data: updateCourseDto });
+  async update(id: string, dto: UpdateCourseDto) {
+    const course = await this.prisma.course.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!course) {
+      throw new NotFoundException('Course not found.');
+    }
+
+    if (dto.moduleId) {
+      const module = await this.prisma.module.findUnique({
+        where: {
+          id: dto.moduleId,
+        },
+      });
+
+      if (!module) {
+        throw new NotFoundException('Module not found.');
+      }
+    }
+
+    return this.prisma.course.update({
+      where: {
+        id,
+      },
+      data: dto,
+    });
   }
 
-  remove(id: string) {
-    return this.prisma.course.delete({ where: { id } });
+  async remove(id: string) {
+    const course = await this.prisma.course.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!course) {
+      throw new NotFoundException('Course not found.');
+    }
+
+    return this.prisma.course.delete({
+      where: {
+        id,
+      },
+    });
   }
 }
