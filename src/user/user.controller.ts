@@ -15,6 +15,7 @@ import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import type { JwtPayload } from 'src/auth/types/jwt-payload.type';
 import { AuthGuard } from '@nestjs/passport';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Controller('users')
 export class UserController {
@@ -41,6 +42,14 @@ export class UserController {
   @Post()
   createUser(@Body() data: RegisterDto) {
     return this.userService.createUser(data);
+  }
+  @Patch('me/password')
+  @UseGuards(AuthGuard('jwt'))
+  changePassword(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: ChangePasswordDto,
+  ) {
+    return this.userService.changePassword(user.sub, dto);
   }
   @Delete(':id')
   deleteUser(@Param('id') userId: string) {
