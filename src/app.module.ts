@@ -12,6 +12,7 @@ import { BookmarkModule } from './bookmark/bookmark.module';
 import { CommentModule } from './comment/comment.module';
 import { ReportModule } from './report/report.module';
 import { NoteModule } from './note/note.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { NoteModule } from './note/note.module';
     CommentModule,
     ReportModule,
     NoteModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],
