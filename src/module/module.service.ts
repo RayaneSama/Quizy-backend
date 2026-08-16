@@ -31,19 +31,16 @@ export class ModuleService {
   }
 
   async update(id: string, dto: UpdateModuleDto) {
-    const module = await this.prisma.module.update({
-      where: {
-        id,
-      },
-      data: dto,
+    const module = await this.prisma.module.findUnique({
+      where: { id },
     });
+
     if (!module) {
       throw new NotFoundException('Module not found.');
     }
+
     return this.prisma.module.update({
-      where: {
-        id,
-      },
+      where: { id },
       data: dto,
     });
   }
