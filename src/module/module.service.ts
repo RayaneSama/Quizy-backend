@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateModuleDto } from './dto/create-module.dto';
 import { UpdateModuleDto } from './dto/update-module.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { QueryModuleDto } from './dto/query-module.dto';
 
 @Injectable()
 export class ModuleService {
@@ -10,12 +11,60 @@ export class ModuleService {
     return this.prisma.module.create({ data: createModuleDto });
   }
 
-  async findAll() {
-    return this.prisma.module.findMany({
-      orderBy: {
-        name: 'asc',
+  async findAll(query: QueryModuleDto) {
+    const {
+      page = 1,
+      limit = 10,
+      search,
+      sortBy = 'name',
+      sortOrder = 'asc',
+    } = query;
+
+    const skip = (page - 1) * limit;
+
+    const where = search
+      ? {
+          OR: [
+            {
+              name: {
+                contains: search,
+                mode: 'insensitive' as const,
+              },
+            },
+            {
+              description: {
+                contains: search,
+                mode: 'insensitive' as const,
+              },
+            },
+          ],
+        }
+      : {};
+
+    const [modules, total] = await Promise.all([
+      this.prisma.module.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: {
+          [sortBy]: sortOrder,
+        },
+      }),
+
+      this.prisma.module.count({
+        where,
+      }),
+    ]);
+
+    return {
+      data: modules,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
       },
-    });
+    };
   }
 
   async findOne(id: string) {
