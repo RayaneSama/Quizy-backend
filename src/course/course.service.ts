@@ -24,11 +24,14 @@ export class CourseService {
   }
 
   async findAll() {
-    return this.prisma.course.findMany({
+    const courses = await this.prisma.course.findMany({
       include: {
         module: true,
       },
     });
+    return {
+      data: courses,
+    };
   }
 
   async findOne(id: string) {

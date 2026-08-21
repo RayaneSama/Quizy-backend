@@ -15,7 +15,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 
-@Controller('course')
+@Controller('courses')
 @UseGuards(AuthGuard('jwt'))
 export class CourseController {
   constructor(private readonly courseService: CourseService) {}
