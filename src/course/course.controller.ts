@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
@@ -14,6 +15,7 @@ import { UpdateCourseDto } from './dto/update-course.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
+import { CourseQueryDto } from './dto/course-query.dto';
 
 @Controller('courses')
 @UseGuards(AuthGuard('jwt'))
@@ -28,8 +30,8 @@ export class CourseController {
   }
 
   @Get()
-  findAll() {
-    return this.courseService.findAll();
+  findAll(@Query() query: CourseQueryDto) {
+    return this.courseService.findAll(query);
   }
 
   @Get(':id')
