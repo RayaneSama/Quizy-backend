@@ -6,6 +6,8 @@ import {
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { QuestionQueryDto } from './dto/question-query.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class QuestionService {
@@ -61,14 +63,55 @@ export class QuestionService {
     });
   }
 
-  async findAll() {
-    return this.prisma.question.findMany({
-      include: {
-        choices: true,
-        course: true,
-        module: true,
+  async findAll(query: QuestionQueryDto) {
+    const {
+      page = 1,
+      limit = 10,
+      search,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+      moduleId,
+      courseId,
+    } = query;
+    const skip = (page - 1) * limit;
+    const where: Prisma.QuestionWhereInput = {
+      ...(courseId && { courseId }),
+      ...(moduleId && { moduleId }),
+      ...(search && {
+        statement: {
+          contains: search,
+          mode: 'insensitive' as const,
+        },
+      }),
+    };
+    const [questions, total] = await Promise.all([
+      this.prisma.question.findMany({
+        skip,
+        take: limit,
+        where,
+        orderBy: {
+          [sortBy]: sortOrder,
+        },
+        include: {
+          choices: true,
+          course: true,
+          module: true,
+        },
+      }),
+
+      this.prisma.question.count({
+        where,
+      }),
+    ]);
+    return {
+      data: questions,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
       },
-    });
+    };
   }
 
   async findOne(id: string) {
