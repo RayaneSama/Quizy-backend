@@ -9,14 +9,89 @@ import { RegisterDto } from 'src/auth/dto/register.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import * as bcrypt from 'bcrypt';
-import { AttemptMode } from '@prisma/client';
+import { AttemptMode, Prisma } from '@prisma/client';
+import { UserQueryDto } from './dto/user-query.dto';
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll() {
-    return await this.prisma.user.findMany();
+  async findAll(query: UserQueryDto) {
+    const {
+      page = 1,
+      limit = 10,
+      search,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+      status,
+      role,
+    } = query;
+
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.UserWhereInput = {
+      ...(role && { role }),
+      ...(status && { status }),
+      ...(search && {
+        OR: [
+          {
+            firstName: {
+              contains: search,
+              mode: 'insensitive' as const,
+            },
+          },
+          {
+            lastName: {
+              contains: search,
+              mode: 'insensitive' as const,
+            },
+          },
+          {
+            userName: {
+              contains: search,
+              mode: 'insensitive' as const,
+            },
+          },
+          {
+            email: {
+              contains: search,
+              mode: 'insensitive' as const,
+            },
+          },
+        ],
+      }),
+    };
+    const [users, total] = await Promise.all([
+      this.prisma.user.findMany({
+        skip,
+        take: limit,
+        where,
+        orderBy: {
+          [sortBy]: sortOrder,
+        },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          userName: true,
+          role: true,
+          status: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      }),
+      this.prisma.user.count({ where }),
+    ]);
+    return {
+      data: users,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   async createUser(data: RegisterDto) {
