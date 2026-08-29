@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   Param,
   Patch,
@@ -19,6 +18,7 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { UserQueryDto } from './dto/user-query.dto';
+import { UpdateUserStatusDto } from './dto/update-user-status.dto';
 
 @Controller('users')
 export class UserController {
@@ -66,10 +66,11 @@ export class UserController {
   ) {
     return this.userService.changePassword(user.sub, dto);
   }
+
+  @Patch(':id/status')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('ADMIN')
-  @Delete(':id')
-  deleteUser(@Param('id') userId: string) {
-    return this.userService.deleteUser(userId);
+  updateStatus(@Param('id') userId: string, @Body() dto: UpdateUserStatusDto) {
+    return this.userService.updateStatus(userId, dto);
   }
 }

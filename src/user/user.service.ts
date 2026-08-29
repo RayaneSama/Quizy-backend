@@ -11,6 +11,7 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import * as bcrypt from 'bcrypt';
 import { AttemptMode, Prisma } from '@prisma/client';
 import { UserQueryDto } from './dto/user-query.dto';
+import { UpdateUserStatusDto } from './dto/update-user-status.dto';
 
 @Injectable()
 export class UserService {
@@ -118,10 +119,6 @@ export class UserService {
     return this.prisma.user.create({
       data,
     });
-  }
-
-  async deleteUser(userId: string) {
-    return await this.prisma.user.delete({ where: { id: userId } });
   }
 
   async getProfile(userId: string) {
@@ -433,6 +430,29 @@ export class UserService {
         progress,
         accuracy,
       };
+    });
+  }
+  async updateStatus(userId: string, dto: UpdateUserStatusDto) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        status: dto.status,
+      },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        userName: true,
+        role: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
   }
 }
