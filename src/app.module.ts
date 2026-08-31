@@ -13,6 +13,7 @@ import { CommentModule } from './comment/comment.module';
 import { ReportModule } from './report/report.module';
 import { NoteModule } from './note/note.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { ProgramModule } from './program/program.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
     ReportModule,
     NoteModule,
     DashboardModule,
+    ProgramModule,
   ],
   controllers: [AppController],
   providers: [AppService],

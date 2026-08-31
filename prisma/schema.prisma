@@ -42,6 +42,19 @@ enum ReportStatus {
   REJECTED
 }
 
+model Program {
+  id          String  @id @default(uuid())
+  name        String  @unique
+  description String?
+
+  modules Module[]
+
+  subscriptionPlans SubscriptionPlan[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model SubscriptionPlan {
   id       String @id @default(uuid())
   name     String
@@ -49,6 +62,10 @@ model SubscriptionPlan {
   price    Float
 
   subscriptions Subscription[]
+  program       Program        @relation(fields: [programId], references: [id])
+  programId     String
+
+  @@index([programId])
 }
 
 model Subscription {
@@ -101,6 +118,10 @@ model Module {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   questions Question[]
+  program   Program?   @relation(fields: [programId], references: [id], onDelete: Cascade)
+  programId String?
+
+  @@index([programId])
 }
 
 model Course {
@@ -138,12 +159,11 @@ model Question {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  moduleId         String
-  module           Module            @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   attemptQuestions AttemptQuestion[]
   notes            Note[]
+  module           Module?           @relation(fields: [moduleId], references: [id])
+  moduleId         String?
 
-  @@index([moduleId])
   @@index([courseId])
 }
 
