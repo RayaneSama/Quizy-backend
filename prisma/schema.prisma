@@ -31,6 +31,7 @@ enum AttemptMode {
 }
 
 enum SubscriptionStatus {
+  PENDING
   ACTIVE
   EXPIRED
   CANCELLED
@@ -74,13 +75,17 @@ model Subscription {
   userId String
   planId String
 
-  startDate DateTime
-  endDate   DateTime
+  startDate DateTime?
+  endDate   DateTime?
 
-  status SubscriptionStatus
+  status SubscriptionStatus @default(PENDING)
 
   user User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   plan SubscriptionPlan @relation(fields: [planId], references: [id])
+
+  @@index([userId])
+  @@index([planId])
+  @@index([status])
 }
 
 model User {

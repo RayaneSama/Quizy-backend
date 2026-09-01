@@ -14,6 +14,7 @@ import { ReportModule } from './report/report.module';
 import { NoteModule } from './note/note.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { ProgramModule } from './program/program.module';
+import { SubscriptionPlanModule } from './subscription-plan/subscription-plan.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ProgramModule } from './program/program.module';
     NoteModule,
     DashboardModule,
     ProgramModule,
+    SubscriptionPlanModule,
   ],
   controllers: [AppController],
   providers: [AppService],
