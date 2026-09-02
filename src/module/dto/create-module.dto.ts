@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
 
 export class CreateModuleDto {
   @IsString()
@@ -10,4 +16,8 @@ export class CreateModuleDto {
   @IsOptional()
   @MaxLength(2000)
   description?: string;
+
+  @IsUUID()
+  @IsNotEmpty()
+  programId!: string;
 }

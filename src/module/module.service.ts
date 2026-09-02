@@ -8,7 +8,13 @@ import { QueryModuleDto } from './dto/query-module.dto';
 export class ModuleService {
   constructor(private readonly prisma: PrismaService) {}
   create(createModuleDto: CreateModuleDto) {
-    return this.prisma.module.create({ data: createModuleDto });
+    return this.prisma.module.create({
+      data: {
+        name: createModuleDto.name,
+        description: createModuleDto.description,
+        programId: createModuleDto.programId,
+      },
+    });
   }
 
   async findAll(query: QueryModuleDto) {
@@ -49,6 +55,7 @@ export class ModuleService {
         orderBy: {
           [sortBy]: sortOrder,
         },
+        include: { program: true },
       }),
 
       this.prisma.module.count({
