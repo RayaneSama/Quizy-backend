@@ -66,6 +66,12 @@ export class SubscriptionController {
     return this.subscriptionService.activate(id);
   }
 
+  @Patch(':id/cancel')
+  @Roles('ADMIN')
+  cancel(@Param('id') id: string) {
+    return this.subscriptionService.cancel(id);
+  }
+
   @Patch(':id/reject')
   @Roles('ADMIN')
   reject(@Param('id') id: string) {

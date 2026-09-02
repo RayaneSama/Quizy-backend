@@ -340,4 +340,27 @@ export class SubscriptionService {
       },
     });
   }
+  // ---------------------------------------------
+  // Admin: cancel
+  // ---------------------------------------------
+  async cancel(id: string) {
+    const subscription = await this.prisma.subscription.findUnique({
+      where: { id },
+    });
+
+    if (!subscription) {
+      throw new NotFoundException('Subscription not found');
+    }
+    if (subscription.status !== 'ACTIVE') {
+      throw new BadRequestException(
+        'Only active subscriptions can be cancelled',
+      );
+    }
+    return this.prisma.subscription.update({
+      where: { id },
+      data: {
+        status: 'CANCELLED',
+      },
+    });
+  }
 }
