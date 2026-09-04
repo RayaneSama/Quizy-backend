@@ -16,6 +16,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { ProgramModule } from './program/program.module';
 import { SubscriptionPlanModule } from './subscription-plan/subscription-plan.module';
 import { SubscriptionModule } from './subscription/subscription.module';
+import { QuizModule } from './quiz/quiz.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { SubscriptionModule } from './subscription/subscription.module';
     ProgramModule,
     SubscriptionPlanModule,
     SubscriptionModule,
+    QuizModule,
   ],
   controllers: [AppController],
   providers: [AppService],

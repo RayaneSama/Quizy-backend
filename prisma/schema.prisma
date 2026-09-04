@@ -118,17 +118,18 @@ model User {
 
 model Module {
   id          String  @id @default(uuid())
-  name        String  @unique
+  name        String
   description String?
 
   courses Course[]
 
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  questions Question[]
-  program   Program    @relation(fields: [programId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  program   Program @relation(fields: [programId], references: [id], onDelete: Cascade)
   programId String
 
+  @@unique([programId, name])
   @@index([programId])
 }
 
@@ -142,11 +143,42 @@ model Course {
 
   questions Question[]
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  attempts  Attempt[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  quizzes   Quiz[]
 
   @@index([moduleId])
+}
+
+model Quiz {
+  id          String  @id @default(uuid())
+  title       String
+  description String? @db.Text
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  questions QuizQuestion[]
+  attempts  Attempt[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courseId])
+}
+
+model QuizQuestion {
+  id         String @id @default(uuid())
+  quizId     String
+  questionId String
+  order      Int
+
+  quiz     Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([quizId, questionId])
+  @@index([quizId])
+  @@index([questionId])
 }
 
 model Question {
@@ -169,8 +201,8 @@ model Question {
 
   attemptQuestions AttemptQuestion[]
   notes            Note[]
-  module           Module?           @relation(fields: [moduleId], references: [id])
-  moduleId         String?
+
+  quizQuestions QuizQuestion[]
 
   @@index([courseId])
 }
@@ -253,10 +285,9 @@ model Choice {
 model Attempt {
   id String @id @default(uuid())
 
-  userId   String
-  courseId String
-  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  userId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   mode AttemptMode
 
@@ -266,9 +297,11 @@ model Attempt {
   answers UserAnswer[]
 
   questions AttemptQuestion[]
+  quiz      Quiz?             @relation(fields: [quizId], references: [id])
+  quizId    String?
 
   @@index([userId])
-  @@index([courseId])
+  @@index([quizId])
 }
 
 model AttemptQuestion {

@@ -16,29 +16,33 @@ import { ResultDetail } from './types/result-type';
 export class AttemptService {
   constructor(private readonly prisma: PrismaService) {}
   async create(userId: string, dto: CreateAttemptDto) {
-    const course = await this.prisma.course.findUnique({
+    const quiz = await this.prisma.quiz.findUnique({
       where: {
-        id: dto.courseId,
+        id: dto.quizId,
       },
       include: {
-        questions: true,
+        questions: {
+          include: {
+            question: true,
+          },
+        },
       },
     });
 
-    if (!course) {
-      throw new NotFoundException('Course not found.');
+    if (!quiz) {
+      throw new NotFoundException('Quiz not found.');
     }
 
     if (!userId) {
       throw new UnauthorizedException('You are not allowed to do this!');
     }
 
-    if (course.questions.length < dto.questionCount) {
+    if (quiz.questions.length < dto.questionCount) {
       throw new BadRequestException(
-        `This course only has ${course.questions.length} questions.`,
+        `This quiz only has ${quiz.questions.length} questions.`,
       );
     }
-    const shuffledQuestions = [...course.questions].sort(
+    const shuffledQuestions = [...quiz.questions].sort(
       () => Math.random() - 0.5,
     );
 
@@ -46,18 +50,23 @@ export class AttemptService {
     const attempt = await this.prisma.attempt.create({
       data: {
         userId,
-        courseId: dto.courseId,
+        quizId: dto.quizId,
         mode: dto.mode,
 
         questions: {
           create: selectedQuestions.map((question) => ({
-            questionId: question.id,
+            questionId: question.questionId,
           })),
         },
       },
 
       include: {
-        questions: true,
+        quiz: true,
+        questions: {
+          include: {
+            question: true,
+          },
+        },
       },
     });
     return attempt;

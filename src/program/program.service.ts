@@ -96,7 +96,6 @@ export class ProgramService {
             _count: {
               select: {
                 courses: true,
-                questions: true,
               },
             },
           },

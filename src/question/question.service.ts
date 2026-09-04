@@ -49,7 +49,6 @@ export class QuestionService {
       data: {
         statement: dto.statement,
         explanation: dto.explanation,
-        moduleId: dto.moduleId,
         courseId: dto.courseId,
 
         choices: {
@@ -59,6 +58,7 @@ export class QuestionService {
 
       include: {
         choices: true,
+        course: true,
       },
     });
   }
@@ -76,7 +76,13 @@ export class QuestionService {
     const skip = (page - 1) * limit;
     const where: Prisma.QuestionWhereInput = {
       ...(courseId && { courseId }),
-      ...(moduleId && { moduleId }),
+
+      ...(moduleId && {
+        course: {
+          moduleId,
+        },
+      }),
+
       ...(search && {
         statement: {
           contains: search,
@@ -94,8 +100,11 @@ export class QuestionService {
         },
         include: {
           choices: true,
-          course: true,
-          module: true,
+          course: {
+            include: {
+              module: true,
+            },
+          },
         },
       }),
 
@@ -121,8 +130,11 @@ export class QuestionService {
       },
       include: {
         choices: true,
-        course: true,
-        module: true,
+        course: {
+          include: {
+            module: true,
+          },
+        },
       },
     });
     if (!question) {
@@ -154,7 +166,6 @@ export class QuestionService {
       }
     }
     if (dto.moduleId || dto.courseId) {
-      const moduleId = dto.moduleId ?? question.moduleId;
       const courseId = dto.courseId ?? question.courseId;
 
       const course = await this.prisma.course.findUnique({
@@ -167,7 +178,7 @@ export class QuestionService {
         throw new NotFoundException('Course not found.');
       }
 
-      if (course.moduleId !== moduleId) {
+      if (dto.moduleId && course.moduleId !== dto.moduleId) {
         throw new BadRequestException(
           'The course does not belong to the specified module.',
         );

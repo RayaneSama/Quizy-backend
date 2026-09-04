@@ -3,7 +3,7 @@ import { AttemptMode } from '@prisma/client';
 
 export class CreateAttemptDto {
   @IsUUID()
-  courseId!: string;
+  quizId!: string;
 
   @IsEnum(AttemptMode)
   mode!: AttemptMode;

@@ -319,17 +319,21 @@ export class UserService {
         userId,
       },
       include: {
-        course: {
-          select: {
-            id: true,
-            name: true,
-            questions: {
+        quiz: {
+          include: {
+            course: {
               select: {
                 id: true,
-                choices: {
+                name: true,
+                questions: {
                   select: {
                     id: true,
-                    isCorrect: true,
+                    choices: {
+                      select: {
+                        id: true,
+                        isCorrect: true,
+                      },
+                    },
                   },
                 },
               },
@@ -352,18 +356,22 @@ export class UserService {
     >();
 
     for (const attempt of attempts) {
-      let courseProgress = courses.get(attempt.courseId);
+      if (!attempt.quiz) {
+        continue;
+      }
+      const course = attempt.quiz.course;
+      let courseProgress = courses.get(course.id);
 
       if (!courseProgress) {
         courseProgress = {
-          courseId: attempt.courseId,
-          courseName: attempt.course.name,
-          totalQuestions: attempt.course.questions.length,
+          courseId: course.id,
+          courseName: course.name,
+          totalQuestions: course.questions.length,
           answeredQuestions: new Set<string>(),
           correctQuestions: new Set<string>(),
         };
 
-        courses.set(attempt.courseId, courseProgress);
+        courses.set(course.id, courseProgress);
       }
 
       const answersByQuestion = new Map<string, string[]>();
@@ -381,7 +389,7 @@ export class UserService {
       for (const [questionId, selectedChoices] of answersByQuestion) {
         courseProgress.answeredQuestions.add(questionId);
 
-        const question = attempt.course.questions.find(
+        const question = course.questions.find(
           (question) => question.id === questionId,
         );
 
